@@ -176,4 +176,87 @@ impl CertLoader {
 
         Ok(Arc::new(config))
     }
+
+    /// Builds a rustls `ServerConfig` requiring mutual TLS authentication verified against `ca_path`.
+    ///
+    /// # Arguments
+    /// * `cert_path` - Path to server certificate PEM file.
+    /// * `key_path` - Path to server private key PEM file.
+    /// * `ca_path` - Path to CA certificate PEM file used to authenticate clients.
+    ///
+    /// # Errors
+    /// Returns `CertError` if files cannot be read or TLS configuration is invalid.
+    ///
+    /// # Example
+    /// ```no_run
+    /// use std::path::Path;
+    /// use tls_server_client::cert::CertLoader;
+    ///
+    /// let config = CertLoader::mtls_server_config(
+    ///     Path::new("certs/node1.crt"),
+    ///     Path::new("certs/node1.key"),
+    ///     Path::new("certs/ca.crt"),
+    /// );
+    /// ```
+    pub fn mtls_server_config(
+        cert_path: &Path,
+        key_path: &Path,
+        ca_path: &Path,
+    ) -> Result<Arc<ServerConfig>, CertError> {
+        let certs = Self::load_certs(cert_path)?;
+        let key = Self::load_private_key(key_path)?;
+        let root_store = Self::load_root_cert_store(ca_path)?;
+
+        let provider = Arc::new(rustls::crypto::ring::default_provider());
+        let verifier = rustls::server::WebPkiClientVerifier::builder_with_provider(
+            Arc::new(root_store),
+            provider.clone(),
+        )
+        .build()?;
+        let config = ServerConfig::builder_with_provider(provider)
+            .with_safe_default_protocol_versions()?
+            .with_client_cert_verifier(verifier)
+            .with_single_cert(certs, key)?;
+
+        Ok(Arc::new(config))
+    }
+
+    /// Builds a rustls `ClientConfig` with client certificate for mutual TLS authentication.
+    ///
+    /// # Arguments
+    /// * `cert_path` - Path to client certificate PEM file.
+    /// * `key_path` - Path to client private key PEM file.
+    /// * `ca_path` - Path to CA certificate PEM file used to authenticate peers.
+    ///
+    /// # Errors
+    /// Returns `CertError` if files cannot be read or TLS configuration is invalid.
+    ///
+    /// # Example
+    /// ```no_run
+    /// use std::path::Path;
+    /// use tls_server_client::cert::CertLoader;
+    ///
+    /// let config = CertLoader::mtls_client_config(
+    ///     Path::new("certs/node1.crt"),
+    ///     Path::new("certs/node1.key"),
+    ///     Path::new("certs/ca.crt"),
+    /// );
+    /// ```
+    pub fn mtls_client_config(
+        cert_path: &Path,
+        key_path: &Path,
+        ca_path: &Path,
+    ) -> Result<Arc<ClientConfig>, CertError> {
+        let certs = Self::load_certs(cert_path)?;
+        let key = Self::load_private_key(key_path)?;
+        let root_store = Self::load_root_cert_store(ca_path)?;
+
+        let provider = rustls::crypto::ring::default_provider();
+        let config = ClientConfig::builder_with_provider(Arc::new(provider))
+            .with_safe_default_protocol_versions()?
+            .with_root_certificates(root_store)
+            .with_client_auth_cert(certs, key)?;
+
+        Ok(Arc::new(config))
+    }
 }

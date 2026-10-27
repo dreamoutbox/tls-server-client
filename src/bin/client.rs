@@ -90,14 +90,13 @@ async fn main() -> anyhow::Result<()> {
 
     let server_addr =
         std::env::var("TLS_SERVER_ADDR").unwrap_or_else(|_| "127.0.0.1:8443".to_string());
-    let server_name =
-        std::env::var("TLS_SERVER_NAME").unwrap_or_else(|_| "localhost".to_string());
-    let ca_path =
-        std::env::var("TLS_CA_PATH").unwrap_or_else(|_| "certs/ca.crt".to_string());
-    let payload =
-        std::env::var("TLS_PAYLOAD").unwrap_or_else(|_| "Hello, Secure Rust TLS World!".to_string());
+    let server_name = std::env::var("TLS_SERVER_NAME").unwrap_or_else(|_| "localhost".to_string());
+    let ca_path = std::env::var("TLS_CA_PATH").unwrap_or_else(|_| "certs/ca.crt".to_string());
+    let payload = std::env::var("TLS_PAYLOAD")
+        .unwrap_or_else(|_| "Hello, Secure Rust TLS World!".to_string());
 
-    let echoed = send_and_receive(&server_addr, &server_name, Path::new(&ca_path), &payload).await?;
+    let echoed =
+        send_and_receive(&server_addr, &server_name, Path::new(&ca_path), &payload).await?;
 
     tracing::info!(%echoed, "received verified echo response");
     println!("{echoed}");

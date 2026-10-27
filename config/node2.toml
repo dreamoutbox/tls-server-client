@@ -1,0 +1,13 @@
+self_id = 2
+listen_addr = "127.0.0.1:8444"
+cert_path = "certs/node2.crt"
+key_path = "certs/node2.key"
+ca_path = "certs/ca.crt"
+
+[[peers]]
+id = 1
+addr = "127.0.0.1:8443"
+
+[[peers]]
+id = 3
+addr = "127.0.0.1:8445"

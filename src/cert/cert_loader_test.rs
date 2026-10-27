@@ -24,5 +24,13 @@ fn test_cert_loader_loads_generated_certs() {
 
         let client_cfg = CertLoader::client_config(ca_path).expect("valid client config");
         assert!(Arc::strong_count(&client_cfg) >= 1);
+
+        let mtls_srv = CertLoader::mtls_server_config(certs_path, key_path, ca_path)
+            .expect("valid mtls server config");
+        assert!(Arc::strong_count(&mtls_srv) >= 1);
+
+        let mtls_cli = CertLoader::mtls_client_config(certs_path, key_path, ca_path)
+            .expect("valid mtls client config");
+        assert!(Arc::strong_count(&mtls_cli) >= 1);
     }
 }

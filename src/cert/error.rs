@@ -30,4 +30,7 @@ pub enum CertError {
     /// Underlying TLS protocol or configuration error.
     #[error("tls configuration error: {0}")]
     Tls(#[from] rustls::Error),
+    /// Client certificate verifier builder error.
+    #[error("client verifier error: {0}")]
+    Verifier(#[from] rustls::server::VerifierBuilderError),
 }
