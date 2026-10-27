@@ -1,0 +1,15 @@
+[package]
+name = "tls-server-client"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1.43", features = ["full"] }
+tokio-rustls = "0.26"
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+rustls-pemfile = "2.2"
+rustls-pki-types = "1.11"
+anyhow = "1.0"
+thiserror = "2.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
